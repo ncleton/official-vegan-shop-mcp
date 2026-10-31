@@ -95,7 +95,11 @@ function searchExpression(query: string, limit: number, linkSelector: string | u
     }
     const items = articles.slice(0, limit).map((article) => {
       const link = article.querySelector(${JSON.stringify(linkSelector ? linkSelector + ", " : "")} + ".product-title a, h2 a, h3 a, a.product-thumbnail, a[href$='.html']");
-      const price = article.querySelector(".product-price-and-shipping .price, .price, .product-price");
+      // Prix actuel d'abord : une vignette en promotion n'a pas de « .price » et
+      // son bloc « .product-price » réunit la remise, le prix actuel et l'ancien.
+      const price = [".product-price-and-shipping .price", ".current-price", ".price", ".product-price"]
+        .map((selector) => article.querySelector(selector))
+        .find((element) => element && clean(element.textContent)) || null;
       const regular = article.querySelector(".regular-price");
       const unit = article.querySelector(".unit-price, .price-per-unit, .product-unit-price, .unity");
       const title = article.querySelector(".product-title, .product-name, h2, h3");
